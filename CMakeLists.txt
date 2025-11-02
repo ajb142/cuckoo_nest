@@ -32,12 +32,17 @@ set (
     SRC_FILES 
     src/main.cpp
     src/HAL/Beeper.cpp
+    src/HAL/Screen.cpp
+    src/HAL/Inputs.cpp
 )
 
 add_executable(cuckoo ${SRC_FILES})
 
 # Tell CMake that this target depends on the toolchain being ready
 add_dependencies(cuckoo linaro_toolchain)
+
+# Link threading library
+target_link_libraries(cuckoo pthread)
 
 # =====================================================
 # 4. Set the cross-compiler for this project
@@ -49,10 +54,15 @@ set(CMAKE_CXX_COMPILER ${LINARO_BIN}/arm-linux-gnueabi-g++)
 set(CMAKE_FIND_ROOT_PATH ${LINARO_DIR}/arm-linux-gnueabi/libc)
 set(CMAKE_SYSROOT ${CMAKE_FIND_ROOT_PATH})
 
+# Enable C++11 support
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Optional: Add flags, sysroot, etc.
 target_compile_options(cuckoo PRIVATE
     --sysroot=${CMAKE_SYSROOT}
     -march=armv7-a
+    -std=c++11
 )
 
 # =====================================================
