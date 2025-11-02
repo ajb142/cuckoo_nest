@@ -1,4 +1,5 @@
 #include "HomeScreen.hpp"
+#include <string>
 enum screen_color
 {
    SCREEN_COLOR_BLACK = 0x000000,
@@ -23,6 +24,21 @@ void HomeScreen::Render()
     }
 
     screen_->SetBackgroundColor(colors[currentColorIndex]);
+
+    screen_->DrawLine(0, 160, 320, 160, SCREEN_COLOR_WHITE);
+    
+    // Display text using the bitmap font
+    uint32_t text_color = SCREEN_COLOR_WHITE;
+    if (colors[currentColorIndex] == SCREEN_COLOR_WHITE) {
+        text_color = SCREEN_COLOR_BLACK; // Use black text on white background
+    }
+    
+    // Display various text examples
+    screen_->DrawText(50, 60, "Hello World!", text_color, 1);
+    screen_->DrawText(50, 70, "ASCII Test: !@#$%", text_color, 1);
+    screen_->DrawText(50, 80, "Numbers: 0123456789", text_color, 1);
+    screen_->DrawText(50, 100, "Scaled Text", text_color, 2);
+    screen_->DrawText(50, 130, "Color Index: " + std::to_string(currentColorIndex), text_color, 1);
 }
 
 void HomeScreen::handle_input_event(const InputDeviceType device_type, const struct input_event& event)

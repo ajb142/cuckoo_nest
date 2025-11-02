@@ -33,6 +33,7 @@ set (
     src/main.cpp
     src/HAL/Beeper.cpp
     src/HAL/Display.cpp
+    src/HAL/BitmapFont.cpp
     src/HAL/Inputs.cpp
     src/Screens/HomeScreen.cpp
 )
