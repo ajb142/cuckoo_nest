@@ -12,9 +12,9 @@
 void change_screen_color();
 void handle_input_event(const InputDeviceType device_type, const struct input_event& event);
 
-static Beeper beeper("/dev/input/beeper");
+static Beeper beeper("/dev/input/event0");
 static Screen screen("/dev/fb0");
-static Inputs inputs("/dev/input/button", "/dev/input/rotary");
+static Inputs inputs("/dev/input/event2", "/dev/input/event1");
 
 static HomeScreen home_screen (&screen, &beeper);
 
