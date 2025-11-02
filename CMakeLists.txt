@@ -34,10 +34,10 @@ set (
     src/HAL/Beeper.cpp
 )
 
-add_executable(hello ${SRC_FILES})
+add_executable(cuckoo ${SRC_FILES})
 
 # Tell CMake that this target depends on the toolchain being ready
-add_dependencies(hello linaro_toolchain)
+add_dependencies(cuckoo linaro_toolchain)
 
 # =====================================================
 # 4. Set the cross-compiler for this project
@@ -50,7 +50,7 @@ set(CMAKE_FIND_ROOT_PATH ${LINARO_DIR}/arm-linux-gnueabi/libc)
 set(CMAKE_SYSROOT ${CMAKE_FIND_ROOT_PATH})
 
 # Optional: Add flags, sysroot, etc.
-target_compile_options(hello PRIVATE
+target_compile_options(cuckoo PRIVATE
     --sysroot=${CMAKE_SYSROOT}
     -march=armv7-a
 )
@@ -58,7 +58,7 @@ target_compile_options(hello PRIVATE
 # =====================================================
 # 5. Output location
 # =====================================================
-set_target_properties(hello PROPERTIES
+set_target_properties(cuckoo PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output
 )
 
