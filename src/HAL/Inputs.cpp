@@ -66,21 +66,21 @@ void Inputs::set_callback(InputCallback callback)
 void Inputs::polling_loop()
 {
     while (!should_stop_) {
-        poll_device("button", button_fd_);
-        poll_device("rotary", rotary_fd_);
-        
+        poll_device(InputDeviceType::BUTTON, button_fd_);
+        poll_device(InputDeviceType::ROTARY, rotary_fd_);
+
         // Small sleep to prevent excessive CPU usage
         usleep(1000); // 1ms
     }
 }
 
-void Inputs::poll_device(const std::string& device_name, int fd)
+void Inputs::poll_device(const InputDeviceType device_type, int fd)
 {
     struct input_event event;
     memset(&event, 0, sizeof(event));
     
     int bytes_read = read(fd, &event, sizeof(event));
     if (bytes_read > 0 && callback_) {
-        callback_(device_name, event);
+        callback_(device_type, event);
     }
 }

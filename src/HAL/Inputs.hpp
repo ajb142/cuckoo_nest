@@ -4,11 +4,16 @@
 #include <atomic>
 #include <functional>
 #include <linux/input.h>
+#include "InputDevices.hxx"
 
 class Inputs {
 public:
     // Callback function type for input events
-    using InputCallback = std::function<void(const std::string& device_name, const struct input_event& event)>;
+    using InputCallback = 
+        std::function<void(
+            const InputDeviceType device_type, 
+            const struct input_event& event)
+        >;
     
     Inputs(std::string button_path, std::string rotary_path);
     ~Inputs();
@@ -33,5 +38,5 @@ private:
     
     // Polling function that runs in background thread
     void polling_loop();
-    void poll_device(const std::string& device_name, int fd);
+    void poll_device(const InputDeviceType device_type, int fd);
 };

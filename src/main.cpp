@@ -26,30 +26,14 @@ static int current_color_index = 0;
 
 // Function declarations
 void change_screen_color();
-void handle_input_event(const std::string& device_name, const struct input_event& event);
+void handle_input_event(const InputDeviceType device_type, const struct input_event& event);
 
 static Beeper beeper("/dev/input/beeper");
 static Screen screen("/dev/fb0");
 static Inputs inputs("/dev/input/button", "/dev/input/rotary");
 
-// Input event handler callback
-void handle_input_event(const std::string& device_name, const struct input_event& event) {
-    printf("%s: time_sec=%lu, time_usec=%lu, type=%hu, code=%hu, value=%d | \n",
-           device_name.c_str(),
-           event.time.tv_sec,
-           event.time.tv_usec,
-           event.type,
-           event.code,
-           event.value);
-
-    // Handle button press for screen color change
-    if (device_name == "rotary" && event.type == EV_KEY && event.code == 't' && event.value == 1) {
-        beeper.play(100); // Play beep for 100ms
-        change_screen_color();
-    }
-}
-
-int main() {
+int main() 
+{
    printf("Cuckoo Hello\n");
 
    if (!screen.initialize()) {
@@ -73,6 +57,27 @@ int main() {
    }
 
    return 0;
+}
+
+// Input event handler callback
+void handle_input_event(const InputDeviceType device_type, const struct input_event& event) {
+    printf("%d: time_sec=%lu, time_usec=%lu, type=%hu, code=%hu, value=%d | \n",
+           static_cast<int>(device_type),
+           event.time.tv_sec,
+           event.time.tv_usec,
+           event.type,
+           event.code,
+           event.value);
+
+    // Handle button press for screen color change
+    if (device_type == InputDeviceType::ROTARY 
+      && event.type == EV_KEY 
+      && event.code == 't' 
+      && event.value == 1) 
+   {
+        beeper.play(100); // Play beep for 100ms
+        change_screen_color();
+    }
 }
 
 void change_screen_color() 
