@@ -10,11 +10,12 @@ enum screen_color
 };
 
 static enum screen_color colors[] = {
+    SCREEN_COLOR_BLACK,
     SCREEN_COLOR_RED,
     SCREEN_COLOR_GREEN,
     SCREEN_COLOR_BLUE,
     SCREEN_COLOR_WHITE,
-    SCREEN_COLOR_BLACK};
+};
 static int color_count = sizeof(colors) / sizeof(colors[0]);
 
 void HomeScreen::Render()
@@ -25,7 +26,7 @@ void HomeScreen::Render()
 
     screen_->SetBackgroundColor(colors[currentColorIndex]);
 
-    screen_->DrawLine(0, 160, 320, 160, SCREEN_COLOR_WHITE);
+    // screen_->DrawLine(0, 160, 320, 160, SCREEN_COLOR_WHITE);
     
     // Display text using the bitmap font
     uint32_t text_color = SCREEN_COLOR_WHITE;
@@ -33,16 +34,17 @@ void HomeScreen::Render()
         text_color = SCREEN_COLOR_BLACK; // Use black text on white background
     }
     
-    // Display various text examples
-    screen_->DrawText(50, 60, "Hello World!", text_color, 1);
-    screen_->DrawText(50, 70, "ASCII Test: !@#$%", text_color, 1);
-    screen_->DrawText(50, 80, "Numbers: 0123456789", text_color, 1);
-    screen_->DrawText(50, 100, "Scaled Text", text_color, 2);
-    screen_->DrawText(50, 130, "Color Index: " + std::to_string(currentColorIndex), text_color, 1);
+    // Leaving these examples for now, others may find them useful.
+    // // Display various text examples
+    // screen_->DrawText(50, 60, "Hello World!", text_color, 1);
+    // screen_->DrawText(50, 70, "ASCII Test: !@#$%", text_color, 1);
+    // screen_->DrawText(50, 80, "Numbers: 0123456789", text_color, 1);
+    // screen_->DrawText(50, 100, "Scaled Text", text_color, 2);
+    // screen_->DrawText(50, 130, "Color Index: " + std::to_string(currentColorIndex), text_color, 1);
 
     // get current time
     time_t now = time(0);
-    screen_->DrawText(50, 200, TimeToString(now), text_color, 2);
+    screen_->DrawText(40, 140, TimeToString(now), text_color, 4);
 }
 
 std::string HomeScreen::TimeToString(time_t time) {
