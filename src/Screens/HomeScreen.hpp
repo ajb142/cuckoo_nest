@@ -11,7 +11,8 @@ public:
         Display *screen,
         Beeper *beeper) : screen_(screen), beeper_(beeper) {}
     void Render() override;
-    void handle_input_event(const InputDeviceType device_type, const struct input_event& event) override;
+    std::string TimeToString(time_t time);
+    void handle_input_event(const InputDeviceType device_type, const struct input_event &event) override;
 
 private:
     int currentColorIndex = 0;

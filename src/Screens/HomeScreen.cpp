@@ -39,6 +39,17 @@ void HomeScreen::Render()
     screen_->DrawText(50, 80, "Numbers: 0123456789", text_color, 1);
     screen_->DrawText(50, 100, "Scaled Text", text_color, 2);
     screen_->DrawText(50, 130, "Color Index: " + std::to_string(currentColorIndex), text_color, 1);
+
+    // get current time
+    time_t now = time(0);
+    screen_->DrawText(50, 200, TimeToString(now), text_color, 2);
+}
+
+std::string HomeScreen::TimeToString(time_t time) {
+char buffer[100];
+struct tm* timeinfo = localtime(&time);
+strftime(buffer, sizeof(buffer), "%H:%M:%S", timeinfo);
+return std::string(buffer);
 }
 
 void HomeScreen::handle_input_event(const InputDeviceType device_type, const struct input_event& event)

@@ -37,11 +37,11 @@ int main()
    
    printf("Input polling started in background thread...\n");
 
-   home_screen.Render();
    
    // Main thread can now do other work or just wait
    while (1) {
-       sleep(1); // Sleep for 1 second - background thread handles input polling
+      home_screen.Render();
+      sleep(1); // Sleep for 1 second - background thread handles input polling
    }
 
    return 0;
