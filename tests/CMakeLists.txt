@@ -54,9 +54,9 @@ target_link_libraries(
     pthread
 )
 
+# Enable testing
+enable_testing()
+
 # Include GoogleTest's CMake integration
 include(GoogleTest)
 gtest_discover_tests(cuckoo_tests)
-
-# Enable testing
-enable_testing()
