@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <stack>
 #include "Screens/ScreenBase.hpp"
 
 class ScreenManager 
@@ -15,6 +16,6 @@ public:
 
 
 private:
+    std::stack<ScreenBase*> screen_history_;
     ScreenBase* current_screen_;
-    ScreenBase* previous_screen_;
 };

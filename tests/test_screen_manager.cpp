@@ -10,12 +10,19 @@ public:
     virtual ~MockScreen() {}
     
     void Render() {
-        // Mock implementation - do nothing for tests
+        render_call_count_++;
+    }
+
+    int GetRenderCallCount() const {
+        return render_call_count_;
     }
     
     void handle_input_event(const InputDeviceType device_type, const struct input_event& event) {
         // Mock implementation - do nothing for tests
     }
+
+private:
+    int render_call_count_ = 0;
 };
 
 // Test fixture for ScreenManager tests
@@ -41,65 +48,47 @@ protected:
     MockScreen* mock_screen2;
 };
 
-// Test that ScreenManager can be instantiated
-TEST_F(ScreenManagerTest, CanInstantiate) {
+TEST_F(ScreenManagerTest, CanInstantiate) 
+{
     EXPECT_NE(screen_manager, nullptr);
 }
 
-// Test that ScreenManager constructor initializes properly
-TEST_F(ScreenManagerTest, ConstructorInitialization) {
-    // Create a new ScreenManager to test construction
-    ScreenManager test_manager;
-    
-    // The constructor should complete without throwing
-    SUCCEED();
-}
-
-// Test GoToNextScreen functionality
-TEST_F(ScreenManagerTest, GoToNextScreen) {
-    // Initially no screen should be set
-    // We can't directly test this as current_screen_ is private
-    // But we can test the functionality indirectly
-    
+TEST_F(ScreenManagerTest, FirstScreenRenderCalled) 
+{
     screen_manager->GoToNextScreen(mock_screen1);
-    
-    // After setting a screen, going to another screen should work
-    screen_manager->GoToNextScreen(mock_screen2);
-    
-    // Test should pass if no exceptions are thrown
-    SUCCEED();
+    EXPECT_EQ(mock_screen1->GetRenderCallCount(), 1);
 }
 
-// Test GoToPreviousScreen functionality  
-TEST_F(ScreenManagerTest, GoToPreviousScreen) {
-    // Initially, going to previous screen should handle null case gracefully
-    screen_manager->GoToPreviousScreen();
-    
-    // Set up screens to test previous functionality
+TEST_F(ScreenManagerTest, GoToNextScreen) 
+{   
     screen_manager->GoToNextScreen(mock_screen1);
     screen_manager->GoToNextScreen(mock_screen2);
-    
-    // Now go back to previous screen
-    screen_manager->GoToPreviousScreen();
-    
-    // Test should pass if no exceptions are thrown
-    SUCCEED();
+    EXPECT_EQ(mock_screen2->GetRenderCallCount(),1);
 }
 
-// Test multiple screen transitions
-TEST_F(ScreenManagerTest, MultipleScreenTransitions) {
+TEST_F(ScreenManagerTest, GoToPreviousScreen) 
+{
+    screen_manager->GoToNextScreen(mock_screen1);
+    screen_manager->GoToNextScreen(mock_screen2);
+    screen_manager->GoToPreviousScreen();
+    
+    EXPECT_EQ(mock_screen1->GetRenderCallCount(), 2);
+}
+
+TEST_F(ScreenManagerTest, MultipleScreenTransitions) 
+{
     // Test a sequence of screen transitions
     screen_manager->GoToNextScreen(mock_screen1);
     screen_manager->GoToNextScreen(mock_screen2);
     screen_manager->GoToPreviousScreen();
     screen_manager->GoToNextScreen(mock_screen1);
-    
-    // Test should pass if no exceptions are thrown
-    SUCCEED();
+
+    EXPECT_EQ(mock_screen1->GetRenderCallCount(), 3);
+    EXPECT_EQ(mock_screen2->GetRenderCallCount(), 1);
 }
 
-// Test destructor
-TEST_F(ScreenManagerTest, Destructor) {
+TEST_F(ScreenManagerTest, Destructor) 
+{
     // Set up some screens
     screen_manager->GoToNextScreen(mock_screen1);
     screen_manager->GoToNextScreen(mock_screen2);
@@ -109,4 +98,20 @@ TEST_F(ScreenManagerTest, Destructor) {
     delete test_manager;
     
     SUCCEED();
+}
+
+// Test screen history of three levels
+TEST_F(ScreenManagerTest, ThreeLevelScreenHistory) 
+{
+    MockScreen* mock_screen3 = new MockScreen();
+    screen_manager->GoToNextScreen(mock_screen1);
+    screen_manager->GoToNextScreen(mock_screen2);
+    screen_manager->GoToNextScreen(mock_screen3);
+
+    // go back to screen 1
+    screen_manager->GoToPreviousScreen(); // should go to screen2
+    screen_manager->GoToPreviousScreen(); // should go to screen1
+    
+    EXPECT_EQ(mock_screen1->GetRenderCallCount(), 2);
+    delete mock_screen3;
 }

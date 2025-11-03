@@ -1,8 +1,8 @@
 #include "ScreenManager.hpp"
 
-ScreenManager::ScreenManager()
-    : current_screen_(nullptr), 
-    previous_screen_(nullptr)
+ScreenManager::ScreenManager(): 
+    screen_history_(),
+    current_screen_(nullptr)
 {
 }
 
@@ -12,14 +12,16 @@ ScreenManager::~ScreenManager()
 
 void ScreenManager::GoToNextScreen(ScreenBase *screen)
 {
-    previous_screen_ = current_screen_;
+    screen_history_.push(current_screen_);
     current_screen_ = screen;
+    current_screen_->Render();
 }
 
 void ScreenManager::GoToPreviousScreen()
 {
-    if (previous_screen_ != nullptr) {
-        current_screen_ = previous_screen_;
-        previous_screen_ = nullptr;
+    if (!screen_history_.empty()) {
+        current_screen_ = screen_history_.top();
+        screen_history_.pop();
+        current_screen_->Render();
     }
 }

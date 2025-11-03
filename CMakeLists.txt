@@ -8,10 +8,10 @@ option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_MAIN_APP "Build main application with cross-compiler" ON)
 
 # If building tests, add tests subdirectory and exit early
-if(BUILD_TESTS)
+#if(BUILD_TESTS)
     add_subdirectory(tests)
-    return()
-endif()
+#    return()
+#endif()
 
 # The rest of this file is for cross-compiled main application
 include(ExternalProject)
