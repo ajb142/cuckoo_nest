@@ -47,12 +47,20 @@ add_executable(
     ${TEST_SOURCE_FILES}
 )
 
-# Link against GoogleTest libraries
+# For host system tests, use system libcurl (not cross-compiled version)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(CURL REQUIRED libcurl)
+
+# Add libcurl include directories for host compilation
+target_include_directories(cuckoo_tests PRIVATE ${CURL_INCLUDE_DIRS})
+
+# Link against GoogleTest libraries and system libcurl
 target_link_libraries(
     cuckoo_tests
     gtest_main
     gtest
     pthread
+    ${CURL_LIBRARIES}
 )
 
 # Enable testing

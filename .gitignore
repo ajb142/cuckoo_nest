@@ -40,8 +40,6 @@
 # debug information files
 *.dwo
 
-build
-build-main
-build-tests
+build*
 Testing
 upload.sh

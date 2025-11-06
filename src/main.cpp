@@ -9,6 +9,9 @@
 #include "Screens/HomeScreen.hpp"
 #include "Screens/MenuScreen.hpp"
 #include "Screens/DimmerScreen.hpp"
+
+#include "Integrations/ActionHomeAssistantService.hpp"
+
 #include <iostream>
 
 // Function declarations
