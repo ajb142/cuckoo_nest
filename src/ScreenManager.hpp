@@ -15,7 +15,7 @@ public:
     ScreenManager(HAL *hal);
     ~ScreenManager();
     
-    void GoToNextScreen(ScreenBase* screen);
+    void GoToNextScreen(int id);
     void GoToPreviousScreen();
     void RenderCurrentScreen();
     void ProcessInputEvent(const InputDeviceType device_type, const input_event &event);
@@ -27,6 +27,11 @@ public:
     ScreenBase* GetScreenById(int id) const {
         auto it = screens_.find(id);
         return (it != screens_.end()) ? it->second.get() : nullptr;
+    }
+
+    void AddScreen(std::unique_ptr<ScreenBase> screen) {
+        int id = screen->GetId();
+        screens_[id] = std::move(screen);
     }
 
 private:

@@ -64,9 +64,9 @@ void HomeScreen::handle_input_event(const InputDeviceType device_type, const str
         // Move to the next color
         //currentColorIndex = (currentColorIndex + 1) % color_count;
 
-        if (nextScreen_ != nullptr)
+        if (nextScreenId_ != -1)
         {
-            screenManager_->GoToNextScreen(nextScreen_);
+            screenManager_->GoToNextScreen(nextScreenId_);
         }
         else
         {

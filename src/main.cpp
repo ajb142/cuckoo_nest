@@ -144,7 +144,7 @@ int main()
 
     home_screen->SetNextScreen(menu_screen);
 
-    screen_manager.GoToNextScreen(home_screen);
+    screen_manager.GoToNextScreen(1);
 
     // Set up input event callback
     inputs.set_callback(handle_input_event);

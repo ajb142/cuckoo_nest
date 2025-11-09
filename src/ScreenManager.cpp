@@ -24,18 +24,23 @@ ScreenManager::~ScreenManager()
 {
 }
 
-void ScreenManager::GoToNextScreen(ScreenBase *screen)
+void ScreenManager::GoToNextScreen(int id)
 {
-    screen_history_.push(current_screen_);
+    ScreenBase* screen = GetScreenById(id);
+    if (screen == nullptr)
+    {
+        return;
+    }
     current_screen_ = screen;
+    screen_history_.push(current_screen_);
     current_screen_->Render();
 }
 
 void ScreenManager::GoToPreviousScreen()
 {
     if (!screen_history_.empty()) {
-        current_screen_ = screen_history_.top();
         screen_history_.pop();
+        current_screen_ = screen_history_.top();
         current_screen_->Render();
     }
 }

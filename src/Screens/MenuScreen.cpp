@@ -76,9 +76,9 @@ void MenuScreen::handle_input_event(const InputDeviceType device_type, const str
         }
 
         // If there's a next screen, navigate to it
-        if (selectedItem.nextScreen != nullptr)
-        {
-            screenManager_->GoToNextScreen(selectedItem.nextScreen);
-        }
+        // if (selectedItem.nextScreen != nullptr)
+        // {
+        //     screenManager_->GoToNextScreen(selectedItem);
+        // }
     }
 }
