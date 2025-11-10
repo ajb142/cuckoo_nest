@@ -65,10 +65,11 @@ endif()
 
 # Add json11 include directory
 target_include_directories(cuckoo PRIVATE ${CMAKE_SOURCE_DIR}/third-party/json11)
+target_include_directories(cuckoo PRIVATE /home/alex/lv_port_linux)
 
 # For runtime dynamic linking, we don't link libcurl at build time
 # We use dlopen/dlsym to load it at runtime on the target device
-target_link_libraries(cuckoo pthread dl)
+target_link_libraries(cuckoo PRIVATE /home/alex/lv_port_linux/build/lvgl/lib/liblvgl.a pthread dl)
 
 # =====================================================
 # 5. Set the cross-compiler for this project
@@ -83,6 +84,7 @@ set(CMAKE_SYSROOT ${CMAKE_FIND_ROOT_PATH})
 # Enable C++11 support
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 # Optional: Add flags, sysroot, etc.
 target_compile_options(cuckoo PRIVATE
