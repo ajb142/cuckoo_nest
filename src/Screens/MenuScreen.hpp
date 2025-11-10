@@ -9,27 +9,23 @@
 class MenuItem
 {
     public:
-        MenuItem(const std::string& name, ScreenBase* screen, IntegrationActionBase *action) : 
+        MenuItem(const std::string& name, int nextScreenId) : 
             name(name), 
-            nextScreen(screen),
-            callback(action) {}
-        
+            nextScreenId(nextScreenId) {}
+
         std::string name;
-        ScreenBase* nextScreen;
-        IntegrationActionBase *callback;
+        int nextScreenId;
 };
 
 class MenuScreen : public ScreenBase
 {
 public:
-    MenuScreen(
-        ScreenManager* screenManager,
-        Display *display,
-        Beeper *beeper) : 
+    MenuScreen(HAL *hal,
+        ScreenManager* screenManager) : 
         ScreenBase(), 
         screenManager_(screenManager),
-        display_(display), 
-        beeper_(beeper),
+        display_(hal->display),
+        beeper_(hal->beeper),
         menuSelectedIndex(0),
         rotaryAccumulator(0) {}
 
@@ -39,6 +35,9 @@ public:
     void handle_input_event(const InputDeviceType device_type, const struct input_event &event) override;
     void AddMenuItem(const MenuItem& item) {
         menuItems.push_back(item);
+    }
+    int CountMenuItems() const {
+        return menuItems.size();
     }
 
 private:

@@ -8,8 +8,11 @@ void MenuScreen::Render()
         return;
     }
 
+    
     display_->SetBackgroundColor(SCREEN_COLOR_BLACK);
 
+    display_->DrawText(60, 60, "MenuName", SCREEN_COLOR_WHITE, 3);
+    
     int idx = 0;
     for (const auto &item : menuItems)
     {
@@ -48,7 +51,6 @@ void MenuScreen::handle_input_event(const InputDeviceType device_type, const str
             }
             rotaryAccumulator = 0;
         }
-        std::cout << "Menu selected index: " << menuSelectedIndex << ", rotaryAccumulator: " << rotaryAccumulator << std::endl;
     }
 
     if (device_type == InputDeviceType::BUTTON && event.type == EV_KEY && event.code == 't' && event.value == 1)
@@ -63,22 +65,20 @@ void MenuScreen::handle_input_event(const InputDeviceType device_type, const str
             return; // Invalid index
         }
 
+        if (menuItems[menuSelectedIndex].name == "Back")
+        {
+            screenManager_->GoToPreviousScreen();
+            return;
+        }
+
         MenuItem &selectedItem = menuItems[menuSelectedIndex];
 
-        // If there's a callback, invoke it
-        if (selectedItem.callback != nullptr)
+        if (screenManager_ == nullptr)
         {
-            selectedItem.callback->execute();
-        }
-        else
-        {
-            std::cout << "MenuScreen: No callback for selected item '" << selectedItem.name << "'\n";
+            std::cerr << "MenuScreen: screenManager_ is null!" << std::endl;
+            return;
         }
 
-        // If there's a next screen, navigate to it
-        if (selectedItem.nextScreen != nullptr)
-        {
-            screenManager_->GoToNextScreen(selectedItem.nextScreen);
-        }
+        screenManager_->GoToNextScreen(selectedItem.nextScreenId);
     }
 }

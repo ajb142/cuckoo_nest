@@ -41,6 +41,8 @@ set (
     Screens/HomeScreen.cpp
     Screens/DimmerScreen.cpp
     Screens/MenuScreen.cpp
+    Screens/SwitchScreen.cpp
+    Integrations/IntegrationContainer.cpp
 )
 
 add_executable(cuckoo ${SRC_FILES})

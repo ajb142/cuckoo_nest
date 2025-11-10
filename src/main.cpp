@@ -2,14 +2,14 @@
 #include <unistd.h>
 #include "linux/input.h"
 
-#include "HAL/Beeper.hpp"
-#include "HAL/Display.hpp"
-#include "HAL/Inputs.hpp"
+#include "HAL/HAL.hpp"
 
 #include "Screens/HomeScreen.hpp"
 #include "Screens/MenuScreen.hpp"
 #include "Screens/DimmerScreen.hpp"
+#include "Screens/SwitchScreen.hpp"
 
+#include "Integrations/IntegrationContainer.hpp"
 #include "Integrations/ActionHomeAssistantService.hpp"
 #include "ConfigurationReader.hpp"
 
@@ -21,14 +21,20 @@ void handle_input_event(const InputDeviceType device_type, const struct input_ev
 void menu_screen_callback_on();
 void menu_screen_callback_off();
 
+static HAL hal;
 static Beeper beeper("/dev/input/event0");
 static Display screen("/dev/fb0");
 static Inputs inputs("/dev/input/event2", "/dev/input/event1");
-static ScreenManager screen_manager;
+static IntegrationContainer integration_container;
+static ScreenManager screen_manager(&hal, &integration_container);
 
 int main()
 {
     std::cout << "Cuckoo Hello\n";
+
+    hal.beeper = &beeper;
+    hal.display = &screen;
+    hal.inputs = &inputs;
 
     // Load configuration
     ConfigurationReader config("config.json");
@@ -51,21 +57,56 @@ int main()
         std::cout << "Failed to load configuration, using defaults\n";
     }
 
-    ActionHomeAssistantService ha_service_light_on(
+    ActionHomeAssistantService ha_service_g_light_on(
         config.get_home_assistant_token(""),
         "notused",
         config.get_home_assistant_base_url(""),
         "switch/turn_on",
-        config.get_home_assistant_entity_id("switch.dining_room_spot_lights")
+        "switch.dining_room_spot_lights"
     );
 
-    ActionHomeAssistantService ha_service_light_off(
+    ActionHomeAssistantService ha_service_g_light_off(
         config.get_home_assistant_token(""),
         "notused",
         config.get_home_assistant_base_url(""),
         "switch/turn_off",
-        config.get_home_assistant_entity_id("switch.dining_room_spot_lights")
+        "switch.dining_room_spot_lights"
     );
+
+    ActionHomeAssistantService ha_service_oo_light_on(
+        config.get_home_assistant_token(""),
+        "notused",
+        config.get_home_assistant_base_url(""),
+        "switch/turn_on",
+        "switch.garden_room_main_lights"
+    );
+
+    ActionHomeAssistantService ha_service_oo_light_off(
+        config.get_home_assistant_token(""),
+        "notused",
+        config.get_home_assistant_base_url(""),
+        "switch/turn_off",
+        "switch.garden_room_main_lights"
+    );
+
+    ActionHomeAssistantService ha_service_oe_light_on(
+        config.get_home_assistant_token(""),
+        "notused",
+        config.get_home_assistant_base_url(""),
+        "switch/turn_on",
+        "switch.garden_room_external_lights"
+    );
+
+    ActionHomeAssistantService ha_service_oe_light_off(
+        config.get_home_assistant_token(""),
+        "notused",
+        config.get_home_assistant_base_url(""),
+        "switch/turn_off",
+        "switch.garden_room_external_lights"
+    );
+
+
+
 
     if (!screen.initialize())
     {
@@ -73,29 +114,10 @@ int main()
         return 1;
     }
 
-    auto menu_screen = new MenuScreen(
-        &screen_manager,
-        &screen,
-        &beeper);
-
-    auto home_screen = new HomeScreen(
-        &screen_manager,
-        &screen,
-        &beeper);
-
-    auto dimmer_screen = new DimmerScreen(
-        &screen_manager,
-        &screen,
-        &beeper);
-
-    menu_screen->AddMenuItem(MenuItem("On", nullptr, &ha_service_light_on));
-    menu_screen->AddMenuItem(MenuItem("Off", nullptr, &ha_service_light_off));
-    menu_screen->AddMenuItem(MenuItem("Dimmer", dimmer_screen, nullptr));
-    menu_screen->AddMenuItem(MenuItem("Back", home_screen, nullptr));
-
-    home_screen->SetNextScreen(menu_screen);
-
-    screen_manager.GoToNextScreen(home_screen);
+    
+    integration_container.LoadIntegrationsFromConfig("config.json");
+    screen_manager.LoadScreensFromConfig("config.json");
+    screen_manager.GoToNextScreen(1);
 
     // Set up input event callback
     inputs.set_callback(handle_input_event);
