@@ -32,6 +32,13 @@ public:
         integrationId_ = id;
     }
 
+    const std::string& GetName() const {
+        return name_;
+    }
+    void SetName(const std::string& name) {
+        name_ = name;
+    }
+
 private:
 
     enum class SwitchState {
@@ -49,6 +56,7 @@ private:
     Display* display_;
     int rotaryAccumulator;
     int integrationId_;
+    std::string name_;
 
 
 };

@@ -162,8 +162,10 @@ void ScreenManager::BuildMenuScreenFromJSON(const json11::Json &screenJson, int 
 void ScreenManager::BuildSwitchScreenFromJSON(const json11::Json &screenJson, int id)
 {
     int integrationId = screenJson["integrationId"].int_value();
+    std::string name = screenJson["name"].string_value();
     auto switchScreen = new SwitchScreen(hal_, this);
     switchScreen->SetIntegrationId(integrationId);
+    switchScreen->SetName(name);
     screens_[id] = std::unique_ptr<ScreenBase>(switchScreen);
 }
 
