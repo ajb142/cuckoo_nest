@@ -80,7 +80,7 @@ int main()
 
     // draw some text on the screen
     lv_obj_t * label = lv_label_create(lv_screen_active());
-    lv_label_set_text(label, "Hello, LVGL!");
+    lv_label_set_text(label, "Hello! 6 / 7");
     lv_obj_add_style(label, &yourName, 0);
     lv_obj_center(label);
 

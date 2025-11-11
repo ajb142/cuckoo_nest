@@ -4,28 +4,6 @@
 include(ExternalProject)
 
 # =====================================================
-# 1. Define the toolchain download information
-# =====================================================
-set(LINARO_URL "https://releases.linaro.org/components/toolchain/binaries/4.9-2017.01/arm-linux-gnueabi/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabi.tar.xz")
-set(LINARO_TARBALL "${CMAKE_BINARY_DIR}/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabi.tar.xz")
-set(LINARO_DIR "${CMAKE_BINARY_DIR}/linaro/src/linaro_toolchain")
-set(LINARO_BIN "${LINARO_DIR}/bin")
-
-# =====================================================
-# 2. Download & extract the toolchain using ExternalProject
-# =====================================================
-ExternalProject_Add(
-    linaro_toolchain
-    PREFIX ${CMAKE_BINARY_DIR}/linaro
-    URL ${LINARO_URL}
-    DOWNLOAD_DIR ${CMAKE_BINARY_DIR}
-    CONFIGURE_COMMAND ""   # no configure step
-    BUILD_COMMAND ""       # no build step
-    INSTALL_COMMAND ""     # no install step
-    UPDATE_DISCONNECTED 1
-)
-
-# =====================================================
 # 3. Define your actual build target
 # =====================================================
 set (
@@ -69,7 +47,7 @@ target_include_directories(cuckoo PRIVATE /home/alex/lv_port_linux)
 
 # For runtime dynamic linking, we don't link libcurl at build time
 # We use dlopen/dlsym to load it at runtime on the target device
-target_link_libraries(cuckoo PRIVATE /home/alex/lv_port_linux/build/lvgl/lib/liblvgl.a pthread dl)
+target_link_libraries(cuckoo PRIVATE ${CMAKE_BINARY_DIR}/lvgl/src/lvgl-build/lib/liblvgl.a pthread dl)
 
 # =====================================================
 # 5. Set the cross-compiler for this project
