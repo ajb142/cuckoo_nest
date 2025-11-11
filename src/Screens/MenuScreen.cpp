@@ -51,6 +51,9 @@ void MenuScreen::handle_input_event(const InputDeviceType device_type, const str
             }
             rotaryAccumulator = 0;
         }
+
+        std::cout << "MenuScreen: Rotary event, new selected index: " << menuSelectedIndex 
+        << "accumulator: " << rotaryAccumulator << std::endl;
     }
 
     if (device_type == InputDeviceType::BUTTON && event.type == EV_KEY && event.code == 't' && event.value == 1)

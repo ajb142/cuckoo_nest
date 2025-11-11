@@ -14,10 +14,20 @@
 #include "ConfigurationReader.hpp"
 
 #include <iostream>
+#include <queue>
+#include <mutex>
 
 #include <ctype.h>
 
 #include "lvgl/lvgl.h"
+
+class MyInputEvent{
+public:
+    MyInputEvent(InputDeviceType device_type, const struct input_event &event)
+        : device_type(device_type), event(event) {}
+    InputDeviceType device_type;
+    struct input_event event;
+};
 
 /**
  * @brief Sets the backlight brightness by writing to the sysfs file.
@@ -58,6 +68,11 @@ static Inputs inputs("/dev/input/event2", "/dev/input/event1");
 static IntegrationContainer integration_container;
 static ScreenManager screen_manager(&hal, &integration_container);
 
+// create a fifo for input events
+std::queue<MyInputEvent> input_event_queue;
+// Mutex for thread safety
+std::mutex input_event_queue_mutex;
+
 int main()
 {
     std::cout << "Cuckoo Hello\n";
@@ -71,50 +86,7 @@ int main()
         return 1;
     }
 
-
-
-    // /* Create the arc object which will be our expanding/contracting ring */
-    // lv_obj_t * arc = lv_arc_create(lv_screen_active());
-
-    // /* Configure the arc to be a full 360-degree ring */
-    // lv_arc_set_bg_angles(arc, 0, 360);
-    // // We don't need the knob or the indicator line, so remove them.
-    // lv_obj_remove_style(arc, NULL, LV_PART_INDICATOR);
-    // lv_obj_remove_style(arc, NULL, LV_PART_KNOB);
-
-    // /* Create a style to define the ring's appearance (thickness and color) */
-    // static lv_style_t style_ring;
-    // lv_style_init(&style_ring);
-    // lv_style_set_arc_width(&style_ring, 20); // Set the ring thickness to 20px
-    // lv_style_set_arc_color(&style_ring, lv_palette_main(LV_PALETTE_CYAN));
-    // lv_obj_add_style(arc, &style_ring, 0);
-
-    // /* Center the arc initially (it will have 0 size) */
-    // lv_obj_center(arc);
-
-    // /*
-    //  * Configure the animation
-    //  */
-    // lv_anim_t a;
-    // lv_anim_init(&a);
-    // lv_anim_set_var(&a, arc);                             // Set the object to animate
-    // lv_anim_set_values(&a, 0, 320);                       // Animate from size 0 to 320
-    // lv_anim_set_exec_cb(&a, anim_size_cb);                // Set the function to call on each step
-    // lv_anim_set_time(&a, 2000);                           // Animation duration in milliseconds (2 seconds)
-    // lv_anim_set_playback_time(&a, 2000);                  // Playback (reverse) duration (2 seconds)
-    // lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE); // Repeat indefinitely
-    // lv_anim_start(&a);                                    // Start the animation!
-
-
-    /*Handle LVGL tasks*/
-    while(1) {
-        lv_timer_handler();
-        usleep(5000);
-    }
-
-    return 0;
-
-
+    std::cout << "Screen initialized successfully\n";
 
     hal.beeper = &beeper;
     hal.display = &screen;
@@ -161,6 +133,17 @@ int main()
     const int ticks_per_second = 1 * 1000 * 1000 / 5000; // 1 second / input polling interval (5ms)
     while (true)
     {
+        {
+            std::lock_guard<std::mutex> lock(input_event_queue_mutex);
+            while (!input_event_queue.empty()) {
+                std::cout << "got event from queue\n";
+                auto event = input_event_queue.front();
+                input_event_queue.pop();
+                screen_manager.ProcessInputEvent(event.device_type, event.event);
+                screen_manager.RenderCurrentScreen();
+            }
+        }
+
         screen.TimerHandler();
         tick++;
         if (tick >= ticks_per_second)
@@ -184,6 +167,13 @@ void handle_input_event(const InputDeviceType device_type, const struct input_ev
         return; // Ignore "end of event" markers from rotary encoder
     }
 
-    screen_manager.ProcessInputEvent(device_type, event);
-    screen_manager.RenderCurrentScreen();
+    std::cout << "Main: Received input event - type: " << event.type 
+              << ", code: " << event.code 
+              << ", value: " << event.value << std::endl;
+
+    std::lock_guard<std::mutex> lock(input_event_queue_mutex);
+    input_event_queue.push(MyInputEvent(device_type, event));
+
+    // screen_manager.ProcessInputEvent(device_type, event);
+    // screen_manager.RenderCurrentScreen();
 }

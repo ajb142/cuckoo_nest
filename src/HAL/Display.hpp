@@ -31,7 +31,4 @@ private:
     // lvgl display members
     lv_display_t *disp;
     lv_style_t *mainFont;
-    
-    // Helper functions
-    void DrawBitmapChar(char c, int x, int y, uint32_t color, int scale);
 };
