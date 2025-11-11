@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <cstring>
 
+
+
 Display::Display(std::string device_path) : device_path_(device_path)
 {
 }
@@ -24,52 +26,30 @@ Display::~Display()
     }
 }
 
-bool Display::initialize()
+bool Display::Initialize()
 {
-    screen_buffer = open("/dev/fb0", O_RDWR);
-    if (screen_buffer < 0)
-    {
-        std::cerr << "Failed to open screen buffer" << std::endl;
+    lv_init();
+
+    //Create a display
+    disp = lv_linux_fbdev_create();
+    if (disp == NULL) {
+        perror("lv_linux_fbdev_create failed");
         return false;
     }
 
-    struct fb_var_screeninfo vinfo;
-    struct fb_fix_screeninfo finfo;
+    lv_linux_fbdev_set_file(disp, "/dev/fb0");
+    lv_display_set_resolution(disp, 320, 320);
 
-    // Get screen info
-    if (ioctl(screen_buffer, FBIOGET_VSCREENINFO, &vinfo) == -1)
-    {
-        std::cerr << "Error reading variable screen info" << std::endl;
-        return false;
-    }
+    // Setup main font
+    mainFont = new lv_style_t;
+    lv_style_init(mainFont);
+    lv_style_set_text_font(mainFont, &lv_font_montserrat_28);
 
-    if (ioctl(screen_buffer, FBIOGET_FSCREENINFO, &finfo) == -1)
-    {
-        std::cerr << "Error reading fixed screen info" << std::endl;
-        return false;
-    }
-
-    std::cout << "Screen resolution: " << vinfo.xres << "x" << vinfo.yres << std::endl;
-
-    // Calculate screen buffer size
-    screensize = vinfo.yres_virtual * finfo.line_length;
-
-    std::cout << "Screen buffer size: " << screensize << " bytes" << std::endl;
-
-    working_buffer = new char[screensize];
-    if (working_buffer == nullptr)
-    {
-        std::cerr << "Error allocating working buffer" << std::endl;
-        return false;
-    }
-
-    // Map the device to memory
-    fbp = (char *)mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, screen_buffer, 0);
-    if (fbp == MAP_FAILED)
-    {
-        std::cerr << "Failed to map framebuffer device to memory" << std::endl;
-        return false;
-    }
+    // Draw loading screen
+    lv_obj_t * label = lv_label_create(lv_screen_active());
+    lv_label_set_text(label, "Loading...");
+    lv_obj_add_style(label, mainFont, 0);
+    lv_obj_center(label);
 
     return true;
 }
@@ -179,4 +159,9 @@ void Display::Flush()
     // Flush changes to screen
     //ioctl(screen_buffer, FBIOPAN_DISPLAY, &vinfo);
     memcpy(fbp, working_buffer, screensize);
+}
+
+void Display::TimerHandler()
+{
+    lv_timer_handler();
 }

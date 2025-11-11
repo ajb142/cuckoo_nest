@@ -3,16 +3,19 @@
 #include <stdint.h>
 #include <linux/fb.h>
 
+#include "lvgl/lvgl.h"
+
 class Display {
 public:
     Display(std::string device_path);
     ~Display();
-    bool initialize();
+    bool Initialize();
     void SetBackgroundColor(uint32_t color);
     void DrawText(int x, int y, const std::string &text, uint32_t color = 0xFFFFFF, int scale = 1);
     void DrawLine(int x0, int y0, int x1, int y1, uint32_t color);
     void DrawPixel(int x, int y, uint32_t color);
     void Flush();
+    void TimerHandler();
 
 private:
     std::string device_path_;
@@ -24,6 +27,10 @@ private:
     // Screen info
     struct fb_var_screeninfo vinfo;
     struct fb_fix_screeninfo finfo;
+
+    // lvgl display members
+    lv_display_t *disp;
+    lv_style_t *mainFont;
     
     // Helper functions
     void DrawBitmapChar(char c, int x, int y, uint32_t color, int scale);
