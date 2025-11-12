@@ -21,6 +21,7 @@ set (
     Screens/MenuScreen.cpp
     Screens/SwitchScreen.cpp
     Integrations/IntegrationContainer.cpp
+    Screens/CuckooLogoNest.cpp
 )
 
 add_executable(cuckoo ${SRC_FILES})

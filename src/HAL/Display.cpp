@@ -1,5 +1,6 @@
 #include "Display.hpp"
 #include "BitmapFont.hpp"
+#include "../Screens/CuckooLogoNest.hpp"
 #include <linux/fb.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -7,7 +8,6 @@
 #include <iostream>
 #include <unistd.h>
 #include <cstring>
-
 
 
 Display::Display(std::string device_path) : device_path_(device_path)
@@ -49,11 +49,21 @@ bool Display::Initialize()
     lv_style_init(fontH2);
     lv_style_set_text_font(fontH2, &lv_font_montserrat_28);
 
-    // Draw loading screen
-    lv_obj_t * label = lv_label_create(lv_screen_active());
-    lv_label_set_text(label, "Loading...");
-    lv_obj_add_style(label, fontH2, 0);
-    lv_obj_center(label);
+    // Display logo image
+    // Extract background color from first pixel of image (RGB565 format)
+    uint16_t first_pixel = (CuckooLogoNest.data[1] << 8) | CuckooLogoNest.data[0];
+    uint32_t bg_color = ((first_pixel & 0xF800) << 8) |  // Red (5 bits -> 8 bits)
+                        ((first_pixel & 0x07E0) << 5) |  // Green (6 bits -> 8 bits)
+                        ((first_pixel & 0x001F) << 3);   // Blue (5 bits -> 8 bits)
+    
+    SetBackgroundColor(bg_color);
+    lv_obj_t * img1 = lv_image_create(lv_screen_active());
+    lv_image_set_src(img1, &CuckooLogoNest);
+    lv_obj_align(img1, LV_ALIGN_CENTER, 0, 0);
+    // Force a render
+    lv_timer_handler();
+    
+    sleep(3);
 
     return true;
 }
