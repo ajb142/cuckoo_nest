@@ -78,6 +78,7 @@ void MenuScreen::handle_input_event(const InputDeviceType device_type, const str
         if (menuItems[menuSelectedIndex].name == "Back")
         {
             screenManager_->GoToPreviousScreen();
+            menuSelectedIndex = 0; // Reset selection
             return;
         }
 

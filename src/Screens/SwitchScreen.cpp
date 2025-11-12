@@ -96,6 +96,7 @@ void SwitchScreen::handle_input_event(const InputDeviceType device_type, const s
         {
             // Navigate back to the previous screen
             screenManager_->GoToPreviousScreen();
+            selectedOption = SelectedOption::TOGGLE; // Reset selection
         }
     }
 }
