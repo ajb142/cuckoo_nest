@@ -40,15 +40,19 @@ bool Display::Initialize()
     lv_linux_fbdev_set_file(disp, "/dev/fb0");
     lv_display_set_resolution(disp, 320, 320);
 
-    // Setup main font
-    mainFont = new lv_style_t;
-    lv_style_init(mainFont);
-    lv_style_set_text_font(mainFont, &lv_font_montserrat_28);
+    // Setup fonts
+    fontH1 = new lv_style_t;
+    lv_style_init(fontH1);
+    lv_style_set_text_font(fontH1, &lv_font_montserrat_48);
+
+    fontH2 = new lv_style_t;
+    lv_style_init(fontH2);
+    lv_style_set_text_font(fontH2, &lv_font_montserrat_28);
 
     // Draw loading screen
     lv_obj_t * label = lv_label_create(lv_screen_active());
     lv_label_set_text(label, "Loading...");
-    lv_obj_add_style(label, mainFont, 0);
+    lv_obj_add_style(label, fontH2, 0);
     lv_obj_center(label);
 
     return true;
@@ -60,13 +64,31 @@ void Display::SetBackgroundColor(uint32_t color)
     lv_obj_clean(scr);
     lv_obj_set_style_bg_color(scr, lv_color_make((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF), 0);
 }
-void Display::DrawText(int x, int y, const std::string &text, uint32_t color, int scale)
+void Display::DrawText(int x, int y, const std::string &text, uint32_t color, Font font)
 {
     lv_obj_t * label = lv_label_create(lv_screen_active());
     lv_label_set_text(label, text.c_str());
-    lv_obj_add_style(label, mainFont, 0);
+
+    switch (font)
+    {
+        case Font::FONT_H1:
+            lv_obj_add_style(label, fontH1, 0);
+            break;
+
+        case Font::FONT_H2:
+            lv_obj_add_style(label, fontH2, 0);
+            break;
+
+        case Font::FONT_DEFAULT:
+        default:
+            lv_obj_add_style(label, fontH2, 0);
+            break;
+    }
+
+    lv_obj_add_style(label, fontH2, 0);
     lv_obj_set_style_text_color(label, lv_color_make((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF), 0);
-    lv_obj_set_pos(label, x, y);
+    lv_obj_center(label);
+    lv_obj_set_y(label, y);
 }
 
 void Display::DrawLine(int x0, int y0, int x1, int y1, uint32_t color)

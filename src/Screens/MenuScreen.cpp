@@ -11,7 +11,7 @@ void MenuScreen::Render()
     
     display_->SetBackgroundColor(SCREEN_COLOR_BLACK);
 
-    display_->DrawText(60, 60, "MenuName", SCREEN_COLOR_WHITE, 3);
+    display_->DrawText(60, -100, "MenuName", SCREEN_COLOR_WHITE, Font::FONT_H1);
     
     int idx = 0;
     for (const auto &item : menuItems)
@@ -21,7 +21,14 @@ void MenuScreen::Render()
         {
             menuName = "> " + menuName; // Indicate selection
         }
-        display_->DrawText(60, 80 + (idx * 25), menuName, SCREEN_COLOR_WHITE, 3);
+        
+        int yOffset = (idx - menuSelectedIndex) * 25;
+        if (idx < menuSelectedIndex - 3 || idx > menuSelectedIndex + 3)
+        {
+            yOffset += 200; // Move off-screen
+        }
+        
+        display_->DrawText(60, yOffset, menuName, SCREEN_COLOR_WHITE, Font::FONT_H2);
         idx++;
     }
 

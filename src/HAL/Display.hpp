@@ -5,13 +5,19 @@
 
 #include "lvgl/lvgl.h"
 
+enum class Font {
+    FONT_H1,
+    FONT_H2,
+    FONT_DEFAULT
+};
+
 class Display {
 public:
     Display(std::string device_path);
     ~Display();
     bool Initialize();
     void SetBackgroundColor(uint32_t color);
-    void DrawText(int x, int y, const std::string &text, uint32_t color = 0xFFFFFF, int scale = 1);
+    void DrawText(int x, int y, const std::string &text, uint32_t color = 0xFFFFFF, Font font = Font::FONT_DEFAULT);
     void DrawLine(int x0, int y0, int x1, int y1, uint32_t color);
     void DrawPixel(int x, int y, uint32_t color);
     void Flush();
@@ -30,5 +36,6 @@ private:
 
     // lvgl display members
     lv_display_t *disp;
-    lv_style_t *mainFont;
+    lv_style_t *fontH2;
+    lv_style_t *fontH1;
 };
