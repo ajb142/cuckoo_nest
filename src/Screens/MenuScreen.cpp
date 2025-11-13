@@ -11,7 +11,7 @@ void MenuScreen::Render()
     
     display_->SetBackgroundColor(SCREEN_COLOR_BLACK);
 
-    display_->DrawText(60, 60, "MenuName", SCREEN_COLOR_WHITE, 3);
+    display_->DrawText(60, -100, "MenuName", SCREEN_COLOR_WHITE, Font::FONT_H1);
     
     int idx = 0;
     for (const auto &item : menuItems)
@@ -21,11 +21,16 @@ void MenuScreen::Render()
         {
             menuName = "> " + menuName; // Indicate selection
         }
-        display_->DrawText(60, 80 + (idx * 25), menuName, SCREEN_COLOR_WHITE, 3);
+        
+        int yOffset = (idx - menuSelectedIndex) * 25;
+        if (idx < menuSelectedIndex - 3 || idx > menuSelectedIndex + 3)
+        {
+            yOffset += 200; // Move off-screen
+        }
+        
+        display_->DrawText(60, yOffset, menuName, SCREEN_COLOR_WHITE, Font::FONT_H2);
         idx++;
     }
-
-    display_->Flush();
 }
 
 void MenuScreen::handle_input_event(const InputDeviceType device_type, const struct input_event &event)
@@ -51,6 +56,9 @@ void MenuScreen::handle_input_event(const InputDeviceType device_type, const str
             }
             rotaryAccumulator = 0;
         }
+
+        std::cout << "MenuScreen: Rotary event, new selected index: " << menuSelectedIndex 
+        << "accumulator: " << rotaryAccumulator << std::endl;
     }
 
     if (device_type == InputDeviceType::BUTTON && event.type == EV_KEY && event.code == 't' && event.value == 1)
@@ -68,6 +76,7 @@ void MenuScreen::handle_input_event(const InputDeviceType device_type, const str
         if (menuItems[menuSelectedIndex].name == "Back")
         {
             screenManager_->GoToPreviousScreen();
+            menuSelectedIndex = 0; // Reset selection
             return;
         }
 

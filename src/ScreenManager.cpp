@@ -35,6 +35,7 @@ void ScreenManager::GoToNextScreen(int id)
     current_screen_ = screen;
     screen_history_.push(current_screen_);
     current_screen_->Render();
+    std::cout << "ScreenManager: Navigated to screen ID " << id << std::endl;
 }
 
 void ScreenManager::GoToPreviousScreen()

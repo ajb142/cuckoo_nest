@@ -27,20 +27,11 @@ void HomeScreen::Render()
     if (colors[currentColorIndex] == SCREEN_COLOR_WHITE) {
         text_color = SCREEN_COLOR_BLACK; // Use black text on white background
     }
-    
-    // Leaving these examples for now, others may find them useful.
-    // // Display various text examples
-    // display_->DrawText(50, 60, "Hello World!", text_color, 1);
-    // display_->DrawText(50, 70, "ASCII Test: !@#$%", text_color, 1);
-    // display_->DrawText(50, 80, "Numbers: 0123456789", text_color, 1);
-    // display_->DrawText(50, 100, "Scaled Text", text_color, 2);
-    // display_->DrawText(50, 130, "Color Index: " + std::to_string(currentColorIndex), text_color, 1);
 
     // get current time
     time_t now = time(0);
-    display_->DrawText(60, 80, "Home", SCREEN_COLOR_WHITE, 3);
-    display_->DrawText(40, 140, TimeToString(now), text_color, 4);
-    display_->Flush();
+    display_->DrawText(60, -40, "Home", SCREEN_COLOR_WHITE, Font::FONT_H1);
+    display_->DrawText(40, 0, TimeToString(now), text_color, Font::FONT_H1);
 }
 
 std::string HomeScreen::TimeToString(time_t time)

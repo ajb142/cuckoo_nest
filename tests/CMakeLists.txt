@@ -29,7 +29,6 @@ set(
     ../src/ConfigurationReader.cpp
     ../third-party/json11/json11.cpp
     ../src/HAL/Beeper.cpp
-    ../src/HAL/Display.cpp
     ../src/HAL/BitmapFont.cpp
     ../src/HAL/Inputs.cpp
     ../src/Screens/HomeScreen.cpp

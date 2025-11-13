@@ -3,6 +3,7 @@
 #include "linux/input.h"
 
 #include "HAL/HAL.hpp"
+#include "HAL/Display.hpp"
 
 #include "Screens/HomeScreen.hpp"
 #include "Screens/MenuScreen.hpp"
@@ -14,12 +15,52 @@
 #include "ConfigurationReader.hpp"
 
 #include <iostream>
+#include <queue>
+#include <mutex>
+
+#include <ctype.h>
+
+#include "lvgl/lvgl.h"
+
+class MyInputEvent{
+public:
+    MyInputEvent(InputDeviceType device_type, const struct input_event &event)
+        : device_type(device_type), event(event) {}
+    InputDeviceType device_type;
+    struct input_event event;
+};
+
+/**
+ * @brief Sets the backlight brightness by writing to the sysfs file.
+ *
+ * @param brightness The brightness value to set (e.g., 115).
+ */
+static void set_backlight_brightness(int brightness) {
+    FILE *f = fopen("/sys/class/backlight/3-0036/brightness", "w");
+    if (f == nullptr) {
+        perror("Failed to open backlight file");
+        return;
+    }
+    fprintf(f, "%d\n", brightness);
+    fclose(f);
+}
+
+/**
+ * @brief Animation callback to set the size of an object.
+ *
+ * @param var The object to animate (the arc).
+ * @param v The new value for width and height.
+ */
+static void anim_size_cb(void * var, int32_t v)
+{
+    lv_obj_t * obj = (lv_obj_t *)var; 
+    lv_obj_set_size(obj, v, v);
+    // Recenter the object as it grows/shrinks to keep it centered
+    lv_obj_center(obj);
+}
 
 // Function declarations
-void change_screen_color();
 void handle_input_event(const InputDeviceType device_type, const struct input_event &event);
-void menu_screen_callback_on();
-void menu_screen_callback_off();
 
 static HAL hal;
 static Beeper beeper("/dev/input/event0");
@@ -28,9 +69,25 @@ static Inputs inputs("/dev/input/event2", "/dev/input/event1");
 static IntegrationContainer integration_container;
 static ScreenManager screen_manager(&hal, &integration_container);
 
+// create a fifo for input events
+std::queue<MyInputEvent> input_event_queue;
+// Mutex for thread safety
+std::mutex input_event_queue_mutex;
+
 int main()
 {
     std::cout << "Cuckoo Hello\n";
+
+
+    set_backlight_brightness(115);
+    
+    if (!screen.Initialize())
+    {
+        std::cerr << "Failed to initialize screen\n";
+        return 1;
+    }
+
+    std::cout << "Screen initialized successfully\n";
 
     hal.beeper = &beeper;
     hal.display = &screen;
@@ -56,64 +113,6 @@ int main()
     } else {
         std::cout << "Failed to load configuration, using defaults\n";
     }
-
-    ActionHomeAssistantService ha_service_g_light_on(
-        config.get_home_assistant_token(""),
-        "notused",
-        config.get_home_assistant_base_url(""),
-        "switch/turn_on",
-        "switch.dining_room_spot_lights"
-    );
-
-    ActionHomeAssistantService ha_service_g_light_off(
-        config.get_home_assistant_token(""),
-        "notused",
-        config.get_home_assistant_base_url(""),
-        "switch/turn_off",
-        "switch.dining_room_spot_lights"
-    );
-
-    ActionHomeAssistantService ha_service_oo_light_on(
-        config.get_home_assistant_token(""),
-        "notused",
-        config.get_home_assistant_base_url(""),
-        "switch/turn_on",
-        "switch.garden_room_main_lights"
-    );
-
-    ActionHomeAssistantService ha_service_oo_light_off(
-        config.get_home_assistant_token(""),
-        "notused",
-        config.get_home_assistant_base_url(""),
-        "switch/turn_off",
-        "switch.garden_room_main_lights"
-    );
-
-    ActionHomeAssistantService ha_service_oe_light_on(
-        config.get_home_assistant_token(""),
-        "notused",
-        config.get_home_assistant_base_url(""),
-        "switch/turn_on",
-        "switch.garden_room_external_lights"
-    );
-
-    ActionHomeAssistantService ha_service_oe_light_off(
-        config.get_home_assistant_token(""),
-        "notused",
-        config.get_home_assistant_base_url(""),
-        "switch/turn_off",
-        "switch.garden_room_external_lights"
-    );
-
-
-
-
-    if (!screen.initialize())
-    {
-        std::cerr << "Failed to initialize screen\n";
-        return 1;
-    }
-
     
     integration_container.LoadIntegrationsFromConfig("config.json");
     screen_manager.LoadScreensFromConfig("config.json");
@@ -131,10 +130,31 @@ int main()
     std::cout << "Input polling started in background thread...\n";
 
     // Main thread can now do other work or just wait
-    while (1)
+    int tick = 0;
+    const int ticks_per_second = 1 * 1000 * 1000 / 5000; // 1 second / input polling interval (5ms)
+    while (true)
     {
-        screen_manager.RenderCurrentScreen();
-        sleep(1); // Sleep for 1 second - background thread handles input polling
+        {
+            std::lock_guard<std::mutex> lock(input_event_queue_mutex);
+            while (!input_event_queue.empty()) {
+                std::cout << "got event from queue\n";
+                auto event = input_event_queue.front();
+                input_event_queue.pop();
+                screen_manager.ProcessInputEvent(event.device_type, event.event);
+                screen_manager.RenderCurrentScreen();
+            }
+        }
+
+        screen.TimerHandler();
+        tick++;
+        if (tick >= ticks_per_second)
+        {
+            tick = 0;
+            // Do once-per-second tasks here if needed
+            screen_manager.RenderCurrentScreen();
+        }
+
+        usleep(5000); // Sleep for 5ms
     }
 
     return 0;
@@ -148,6 +168,13 @@ void handle_input_event(const InputDeviceType device_type, const struct input_ev
         return; // Ignore "end of event" markers from rotary encoder
     }
 
-    screen_manager.ProcessInputEvent(device_type, event);
-    screen_manager.RenderCurrentScreen();
+    std::cout << "Main: Received input event - type: " << event.type 
+              << ", code: " << event.code 
+              << ", value: " << event.value << std::endl;
+
+    std::lock_guard<std::mutex> lock(input_event_queue_mutex);
+    input_event_queue.push(MyInputEvent(device_type, event));
+
+    // screen_manager.ProcessInputEvent(device_type, event);
+    // screen_manager.RenderCurrentScreen();
 }

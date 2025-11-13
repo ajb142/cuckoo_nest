@@ -183,7 +183,7 @@ TEST_F(ScreenManagerConfigLoadTest, MenuScreenItemsLoaded) {
     ASSERT_NE(nullptr, menu_screen);
     MenuScreen* ms = dynamic_cast<MenuScreen*>(menu_screen);
     ASSERT_NE(ms, nullptr);
-    EXPECT_EQ(2, ms->CountMenuItems());
+    EXPECT_EQ(3, ms->CountMenuItems());
 
 }
 

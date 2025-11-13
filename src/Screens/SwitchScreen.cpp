@@ -9,7 +9,7 @@ void SwitchScreen::Render()
     }
 
     display_->SetBackgroundColor(SCREEN_COLOR_BLACK);
-    display_->DrawText(40, 60, GetName().substr(0,10), SCREEN_COLOR_WHITE, 3);
+    display_->DrawText(40, -100, GetName().substr(0,10), SCREEN_COLOR_WHITE, Font::FONT_H1);
 
     std::string buttonText;
     if (selectedOption == SelectedOption::TOGGLE)
@@ -26,12 +26,10 @@ void SwitchScreen::Render()
         buttonText += "Turn off";
     }
 
-    display_->DrawText(60, 120, buttonText, SCREEN_COLOR_WHITE, 3);
+    display_->DrawText(60, 0, buttonText, SCREEN_COLOR_WHITE, Font::FONT_H2);
     
     buttonText = (selectedOption == SelectedOption::BACK) ? "> Back" : "  Back";
-    display_->DrawText(60, 140, buttonText, SCREEN_COLOR_WHITE, 3);
-
-    display_->Flush();
+    display_->DrawText(60, 20, buttonText, SCREEN_COLOR_WHITE, Font::FONT_H2);
 }
 
 void SwitchScreen::handle_input_event(const InputDeviceType device_type, const struct input_event &event)
@@ -96,6 +94,7 @@ void SwitchScreen::handle_input_event(const InputDeviceType device_type, const s
         {
             // Navigate back to the previous screen
             screenManager_->GoToPreviousScreen();
+            selectedOption = SelectedOption::TOGGLE; // Reset selection
         }
     }
 }

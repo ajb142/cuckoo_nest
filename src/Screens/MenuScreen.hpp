@@ -2,7 +2,7 @@
 
 #include "ScreenBase.hpp"
 #include "../ScreenManager.hpp"
-#include "../HAL/Display.hpp"
+#include "../HAL/IDisplay.hpp"
 #include "../HAL/Beeper.hpp"
 #include "../Integrations/IntegrationActionBase.hpp"
 
@@ -43,7 +43,7 @@ public:
 private:
     ScreenManager* screenManager_;
     Beeper* beeper_;
-    Display* display_;
+    IDisplay* display_;
     int menuSelectedIndex;
     int rotaryAccumulator;
     std::vector<MenuItem> menuItems;

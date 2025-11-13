@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Display.hpp"
+#include "IDisplay.hpp"
 #include "Beeper.hpp"
 #include "Inputs.hpp"
 
@@ -10,7 +10,7 @@ public:
     HAL() = default;
     virtual ~HAL() = default;
 
-    Display* display = nullptr;
+    IDisplay* display = nullptr;
     Beeper* beeper = nullptr;
     Inputs* inputs = nullptr;
 };
