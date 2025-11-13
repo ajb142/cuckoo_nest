@@ -44,13 +44,13 @@ TEST_F(IntegrationContainerTest, LoadIntegrationsFromConfigLoadsHomeAssistantSwi
                 "id": 1,
                 "name": "Test Switch 1",
                 "type": "HomeAssistant",
-                "entity_id": "switch.test_switch_1"
+                "entityId": "switch.test_switch_1"
             },
             {
                 "id": 2,
                 "name": "Test Switch 2",
                 "type": "HomeAssistant",
-                "entity_id": "switch.test_switch_2"
+                "entityId": "switch.test_switch_2"
             }
         ]
     })";
