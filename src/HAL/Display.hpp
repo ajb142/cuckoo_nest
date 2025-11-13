@@ -4,24 +4,19 @@
 #include <linux/fb.h>
 
 #include "lvgl/lvgl.h"
+#include "IDisplay.hpp"
 
-enum class Font {
-    FONT_H1,
-    FONT_H2,
-    FONT_DEFAULT
-};
-
-class Display {
+class Display : public IDisplay {
 public:
     Display(std::string device_path);
-    ~Display();
-    bool Initialize();
-    void SetBackgroundColor(uint32_t color);
-    void DrawText(int x, int y, const std::string &text, uint32_t color = 0xFFFFFF, Font font = Font::FONT_DEFAULT);
-    void DrawLine(int x0, int y0, int x1, int y1, uint32_t color);
-    void DrawPixel(int x, int y, uint32_t color);
-    void Flush();
-    void TimerHandler();
+    ~Display() override;
+    bool Initialize() override;
+    void SetBackgroundColor(uint32_t color) override;
+    void DrawText(int x, int y, const std::string &text, uint32_t color = 0xFFFFFF, Font font = Font::FONT_DEFAULT) override;
+    void DrawLine(int x0, int y0, int x1, int y1, uint32_t color) override;
+    void DrawPixel(int x, int y, uint32_t color) override;
+    void Flush() override;
+    void TimerHandler() override;
 
 private:
     std::string device_path_;

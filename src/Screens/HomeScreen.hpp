@@ -31,7 +31,7 @@ public:
 
 private:
     int currentColorIndex = 0;
-    Display *display_;
+    IDisplay *display_;
     Beeper *beeper_;
     ScreenManager *screenManager_;
 

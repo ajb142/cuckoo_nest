@@ -53,7 +53,7 @@ private:
 
     ScreenManager* screenManager_;
     Beeper* beeper_;
-    Display* display_;
+    IDisplay* display_;
     int rotaryAccumulator;
     int integrationId_;
     std::string name_;

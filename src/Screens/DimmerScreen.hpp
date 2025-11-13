@@ -2,7 +2,7 @@
 
 #include "ScreenBase.hpp"
 #include "../ScreenManager.hpp"
-#include "../HAL/Display.hpp"
+#include "../HAL/IDisplay.hpp"
 #include "../HAL/Beeper.hpp"
 
 class DimmerScreen : public ScreenBase
@@ -30,7 +30,7 @@ public:
 private:
     ScreenManager* screenManager_;
     Beeper* beeper_;
-    Display* display_;
+    IDisplay* display_;
     int dimmerValue;
     int integrationId_;
 

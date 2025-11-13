@@ -3,6 +3,7 @@
 #include "linux/input.h"
 
 #include "HAL/HAL.hpp"
+#include "HAL/Display.hpp"
 
 #include "Screens/HomeScreen.hpp"
 #include "Screens/MenuScreen.hpp"
