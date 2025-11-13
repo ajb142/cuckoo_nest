@@ -101,18 +101,6 @@ void Display::DrawText(int x, int y, const std::string &text, uint32_t color, Fo
     lv_obj_set_y(label, y);
 }
 
-void Display::DrawLine(int x0, int y0, int x1, int y1, uint32_t color)
-{
-}
-
-void Display::DrawPixel(int x, int y, uint32_t color)
-{
-}
-
-void Display::Flush()
-{
-}
-
 void Display::TimerHandler()
 {
     lv_timer_handler();

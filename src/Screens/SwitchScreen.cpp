@@ -30,8 +30,6 @@ void SwitchScreen::Render()
     
     buttonText = (selectedOption == SelectedOption::BACK) ? "> Back" : "  Back";
     display_->DrawText(60, 20, buttonText, SCREEN_COLOR_WHITE, Font::FONT_H2);
-
-    display_->Flush();
 }
 
 void SwitchScreen::handle_input_event(const InputDeviceType device_type, const struct input_event &event)

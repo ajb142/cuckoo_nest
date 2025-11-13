@@ -31,8 +31,6 @@ void MenuScreen::Render()
         display_->DrawText(60, yOffset, menuName, SCREEN_COLOR_WHITE, Font::FONT_H2);
         idx++;
     }
-
-    display_->Flush();
 }
 
 void MenuScreen::handle_input_event(const InputDeviceType device_type, const struct input_event &event)

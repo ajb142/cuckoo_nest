@@ -32,7 +32,6 @@ void HomeScreen::Render()
     time_t now = time(0);
     display_->DrawText(60, -40, "Home", SCREEN_COLOR_WHITE, Font::FONT_H1);
     display_->DrawText(40, 0, TimeToString(now), text_color, Font::FONT_H1);
-    display_->Flush();
 }
 
 std::string HomeScreen::TimeToString(time_t time)
