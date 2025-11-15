@@ -45,6 +45,8 @@ set(
     TestScreenManager.cpp
     TestConfigurationReader.cpp
     TestIntegrationContainer.cpp
+    TestBackplateComms.cpp
+    TestCRCCITT.cpp
 )
 
 # Create the test executable
