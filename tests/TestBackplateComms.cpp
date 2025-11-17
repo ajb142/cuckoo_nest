@@ -60,6 +60,7 @@ TEST_F(TestBackplateComms, ParseValidMessage)
     uint8_t data[] = {0xd5, 0x5d, 0xc3, 0xff, 0x00, 0x00,0x00, 0xA3, 0x4B}; // Valid message
     bool result = msg.ParseMessage(data, sizeof(data));
     EXPECT_TRUE(result);
+    EXPECT_EQ(msg.GetMessageCommand(), MessageCommand::Reset);
 }
 
 TEST_F(TestBackplateComms, ParseInvalidChecksum)
@@ -69,5 +70,6 @@ TEST_F(TestBackplateComms, ParseInvalidChecksum)
     bool result = msg.ParseMessage(data, sizeof(data));
     EXPECT_FALSE(result);
 }
+
 
 // Handle data length over the max size of uint16_t
