@@ -1,8 +1,8 @@
-#include "Message.hpp"
+#include "ResponseMessage.hpp"
 
-CRC_CITT Message::CrcCalculator;
+CRC_CITT ResponseMessage::CrcCalculator;
 
-const std::vector<uint8_t>& Message::GetRawMessage() 
+const std::vector<uint8_t>& ResponseMessage::GetRawMessage() 
 {
     if (buffer.empty())
     {
@@ -11,7 +11,7 @@ const std::vector<uint8_t>& Message::GetRawMessage()
     return buffer;
 }
 
-void Message::BuildMessage()
+void ResponseMessage::BuildMessage()
 {
     for (auto &b : Preamble)
     {
@@ -21,8 +21,8 @@ void Message::BuildMessage()
     buffer.push_back(static_cast<uint8_t>(static_cast<uint16_t>(commandId) & 0x00FF));
     buffer.push_back(static_cast<uint8_t>((static_cast<uint16_t>(commandId) >> 8) & 0x00FF));
 
-    buffer.push_back(static_cast<uint8_t>(payloadLength & 0x00FF));
-    buffer.push_back(static_cast<uint8_t>((payloadLength >> 8) & 0x00FF));
+    buffer.push_back(static_cast<uint8_t>(payload.size() & 0x00FF));
+    buffer.push_back(static_cast<uint8_t>((payload.size() >> 8) & 0x00FF));
 
     // Add payload if any
 
@@ -34,4 +34,3 @@ void Message::BuildMessage()
     buffer.push_back(static_cast<uint8_t>(crc & 0x00FF));
     buffer.push_back(static_cast<uint8_t>((crc >> 8) & 0x00FF));
 }
-

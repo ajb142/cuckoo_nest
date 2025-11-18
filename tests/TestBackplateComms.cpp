@@ -1,10 +1,27 @@
-#include "Backplate/Message.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include "Backplate/BackplateComms.hpp"
+#include "Backplate/CommandMessage.hpp"
+#include "Backplate/ResponseMessage.hpp"
 
-using ::testing::ElementsAre;
-using ::testing::ElementsAreArray;
+using ::testing::Return;
 using ::testing::_;
+using ::testing::InSequence;
+using ::testing::SetArgReferee;
+using ::testing::DoAll;
+using ::testing::SetArgPointee;
+using ::testing::ByRef;
+
+class MockSerialPort : public ISerialPort {
+public:
+    MockSerialPort() : ISerialPort("mock_port") {}
+    MOCK_METHOD(bool, Open, (BaudRate baudRate), (override));
+    MOCK_METHOD(void, Close, (), (override));
+    MOCK_METHOD(int, Read, (char* buffer, int bufferSize), (override));
+    MOCK_METHOD(int, Write, (const std::vector<uint8_t>& data), (override));
+    MOCK_METHOD(int, SendBreak, (int durationMs), (override));
+    MOCK_METHOD(int, Flush, (), (override));
+};
 
 class TestBackplateComms : public ::testing::Test {
 protected:
@@ -17,59 +34,89 @@ protected:
         // Code here will be called immediately after each test (right
         // before the destructor).
     }
-}; 
 
-TEST_F(TestBackplateComms, BasicMessageCreation) 
+    MockSerialPort mockSerialPort;
+};
+
+TEST_F(TestBackplateComms, InitializeOpensSerialPortCorrectly) 
 {
-    Message msg(MessageCommand::Reset);
-    auto rawMessage = msg.GetRawMessage();
+    InSequence s;
+    BackplateComms comms(&mockSerialPort);
 
-    ASSERT_EQ(9, rawMessage.size()); // 3 bytes preamble + 2 bytes command + 2 bytes length + 2 bytes CRC
-    EXPECT_THAT(rawMessage, ElementsAre(0xd5, 0x5d, 0xc3, 0xff, 0x00, 0x00, 0x00, _, _)); // last two bytes are CRC
-}
+    EXPECT_CALL(mockSerialPort, Open(BaudRate::Baud115200))
+        .WillOnce(Return(true));
 
-// CRC value is populated correctly
-TEST_F(TestBackplateComms, CrcCalculation)
-{
-    Message msg(MessageCommand::Reset);
-    auto rawMessage = msg.GetRawMessage();
+    EXPECT_CALL(mockSerialPort, Flush()).Times(1);
 
-    EXPECT_THAT(rawMessage[7], 0xA3); 
-    EXPECT_THAT(rawMessage[8], 0x4B); 
-}
+    EXPECT_CALL(mockSerialPort, SendBreak(_))
+        .WillOnce(Return(1)); // Assuming SendBreak returns 1 on success
+    
+    EXPECT_CALL(mockSerialPort, Flush()).Times(1);
 
-TEST_F(TestBackplateComms, ParseTooShortData)
-{
-    Message msg;
-    uint8_t data[8] = {0};
-    bool result = msg.ParseMessage(data, sizeof(data));
-    EXPECT_FALSE(result);
-}
-
-TEST_F(TestBackplateComms, ParseIncorrectPreamble)
-{
-    Message msg;
-    uint8_t data[10] = {0x00, 0x00, 0x00}; // Incorrect preamble
-    bool result = msg.ParseMessage(data, sizeof(data));
-    EXPECT_FALSE(result);
-}
-
-TEST_F(TestBackplateComms, ParseValidMessage)
-{
-    Message msg;
-    uint8_t data[] = {0xd5, 0x5d, 0xc3, 0xff, 0x00, 0x00,0x00, 0xA3, 0x4B}; // Valid message
-    bool result = msg.ParseMessage(data, sizeof(data));
+    bool result = comms.Initialize();
     EXPECT_TRUE(result);
-    EXPECT_EQ(msg.GetMessageCommand(), MessageCommand::Reset);
 }
 
-TEST_F(TestBackplateComms, ParseInvalidChecksum)
+TEST_F(TestBackplateComms, InitializeFailsIfOpenFails) 
 {
-    Message msg;
-    uint8_t data[10] = {0xd5, 0x5d, 0xc3, 0xff, 0x00, 0x00,0x00, 0x00, 0x00}; // Invalid checksum
-    bool result = msg.ParseMessage(data, sizeof(data));
+    InSequence s;
+    BackplateComms comms(&mockSerialPort);
+
+    EXPECT_CALL(mockSerialPort, Open(BaudRate::Baud115200))
+        .WillOnce(Return(false));
+
+    bool result = comms.Initialize();
     EXPECT_FALSE(result);
 }
 
+TEST_F(TestBackplateComms, InitalizeBurstStages) 
+{
+    InSequence s;
+    BackplateComms comms(&mockSerialPort);
 
-// Handle data length over the max size of uint16_t
+    EXPECT_CALL(mockSerialPort, Open(BaudRate::Baud115200))
+        .WillRepeatedly(Return(true));
+
+    CommandMessage resetMessage(MessageType::Reset);
+
+    EXPECT_CALL(
+        mockSerialPort, 
+        Write(testing::ElementsAreArray(resetMessage.GetRawMessage()))
+    ).WillOnce(Return(resetMessage.GetRawMessage().size())); // Assuming Write returns number of bytes written
+
+    ResponseMessage burstPacket1FetPresenceMessage(MessageType::FetPresenceData);
+    burstPacket1FetPresenceMessage.SetPayload(std::vector<uint8_t>{0x01});
+    std::vector<uint8_t> responsebuffer1 = burstPacket1FetPresenceMessage.GetRawMessage();
+    EXPECT_CALL(
+        mockSerialPort,
+        Read(_,_)
+    ).WillOnce(testing::Invoke([responsebuffer1](char* buffer, int bufferSize) {
+        std::memcpy(buffer, responsebuffer1.data(), responsebuffer1.size());
+        return static_cast<int>(responsebuffer1.size());
+    }));
+    
+    
+    ResponseMessage burstPacket2BrkMessage(MessageType::ResponseAscii);
+    burstPacket2BrkMessage.SetPayload(std::vector<uint8_t>{'B', 'R', 'K'});
+    std::vector<uint8_t> responsebuffer2 = burstPacket2BrkMessage.GetRawMessage();
+    EXPECT_CALL(
+        mockSerialPort,
+        Read(_, _)
+    ).WillOnce(testing::Invoke([responsebuffer2](char* buffer, int bufferSize) {
+        std::memcpy(buffer, responsebuffer2.data(), responsebuffer2.size());
+        return static_cast<int>(responsebuffer2.size());
+    })); // Simulate reading the BRK response
+    
+    
+    EXPECT_TRUE(comms.Initialize());
+}
+
+
+// will need tests for
+// no response received to the read - return false
+// no BRK response received - return false
+// incorrect ascii message is received - return false
+// no fet presence response received - return false
+// One status message is sent in bust, followed by BRK
+// Two status messages are sent in burst, followed by BRK
+// No acks are sent until BRK is received

@@ -1,20 +1,46 @@
 #pragma once
+#include <cstdint>
+#include <vector>
+#include <string>
+
+enum class BaudRate {
+    Baud9600 = 9600,
+    Baud19200 = 19200,
+    Baud38400 = 38400,
+    Baud57600 = 57600,
+    Baud115200 = 115200
+};
 
 class ISerialPort {
 public:
-    ISerialPort() = default;
+    ISerialPort(std::string portName)
+        : portName(std::move(portName)) {}
+
     virtual ~ISerialPort() = default;
     
-    virtual bool Open(const char* portName, int baudRate) = 0;
+    virtual bool Open(BaudRate baudRate) = 0;
     virtual void Close() = 0;
     virtual int Read(char* buffer, int bufferSize) = 0;
-    virtual int Write(const char* data, int dataSize) = 0;
+    virtual int Write(const std::vector<uint8_t> &data) = 0;
+    virtual int SendBreak(int durationMs) = 0;
+    virtual int Flush() = 0;
+
+private:
+    std::string portName;
 };
 
 class BackplateComms {
 public:
-    BackplateComms() = default;
-    virtual ~BackplateComms() = default;
+    BackplateComms(ISerialPort* serialPort) : 
+        serialPort(serialPort) {}
     
+    virtual ~BackplateComms() = default;
+
     bool Initialize();
+
+private:
+    bool InitializeSerial();
+    
+private:
+    ISerialPort* serialPort;
 };

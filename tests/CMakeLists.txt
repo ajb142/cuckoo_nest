@@ -36,7 +36,9 @@ set(
     ../src/Screens/DimmerScreen.cpp
     ../src/Screens/SwitchScreen.cpp
     ../src/Integrations/IntegrationContainer.cpp
-    ../src/Backplate/Message.cpp
+    ../src/Backplate/CommandMessage.cpp
+    ../src/Backplate/ResponseMessage.cpp
+    ../src/Backplate/BackplateComms.cpp
 )
 
 # Define test files
@@ -46,6 +48,7 @@ set(
     TestScreenManager.cpp
     TestConfigurationReader.cpp
     TestIntegrationContainer.cpp
+    TestBackplateCommsMessage.cpp
     TestBackplateComms.cpp
     TestCRCCITT.cpp
 )
