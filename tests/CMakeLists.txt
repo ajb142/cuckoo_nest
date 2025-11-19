@@ -33,7 +33,6 @@ set(
     ../src/HAL/Inputs.cpp
     ../src/Screens/HomeScreen.cpp
     ../src/Screens/MenuScreen.cpp
-    ../src/Screens/DimmerScreen.cpp
     ../src/Screens/SwitchScreen.cpp
     ../src/Integrations/IntegrationContainer.cpp
 )
@@ -64,9 +63,6 @@ target_include_directories(cuckoo_tests PRIVATE ${CURL_INCLUDE_DIRS})
 # Add json11 include directory for tests
 target_include_directories(cuckoo_tests PRIVATE ../third-party/json11)
 
-# LVGL include directory (same path used by the main firmware build)
-target_include_directories(cuckoo_tests PRIVATE ${CMAKE_BINARY_DIR}/lvgl/src)
-
 # Link against GoogleTest libraries and system libcurl
 target_link_libraries(
     cuckoo_tests
@@ -74,9 +70,6 @@ target_link_libraries(
     gtest
     pthread
     ${CURL_LIBRARIES}
-
-    # Add LVGL to tests so Display.cpp and DimmerScreen.cpp can link
-    ${CMAKE_BINARY_DIR}/lvgl/src/lvgl-build/lib/liblvgl.a
 )
 
 # Enable testing
