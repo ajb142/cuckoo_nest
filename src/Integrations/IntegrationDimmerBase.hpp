@@ -1,11 +1,6 @@
 #pragma once
 #include <string>
 
-enum class SwitchState {
-    OFF,
-    ON
-};
-
 class IntegrationDimmerBase 
 {
     public:
