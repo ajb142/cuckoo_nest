@@ -12,7 +12,7 @@ void DimmerScreen::Render()
 
     std::string dimmerValueString = std::to_string(dimmerValue / DIMMER_STEP) + "%";
 
-    display_->DrawText(60, -20, "Dimmer", SCREEN_COLOR_WHITE, Font::FONT_H1);
+    display_->DrawText(60, -40, "Dimmer", SCREEN_COLOR_WHITE, Font::FONT_H1);
     display_->DrawText(100, 0, dimmerValueString, SCREEN_COLOR_WHITE, Font::FONT_H2);
 
 }
