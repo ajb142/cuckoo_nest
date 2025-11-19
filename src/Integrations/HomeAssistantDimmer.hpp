@@ -33,7 +33,9 @@ public:
         // Implementation to turn off the Dimmer via Home Assistant
         SetBrightness(-1);
     }
-
+    int GetBrightness() override {  // <-- THIS IS REQUIRED
+        return brightness_;
+    }
 void SetBrightness(int brightness) override
 {
     if (brightness <= 0)
