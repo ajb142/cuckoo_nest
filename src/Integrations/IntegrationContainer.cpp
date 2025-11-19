@@ -52,28 +52,29 @@ void IntegrationContainer::LoadIntegrationsFromConfig(const std::string& configP
         int id = integration["id"].int_value();
         std::string name = integration["name"].string_value();
         std::string type = integration["type"].string_value();
-
-        if (type == "HomeAssistantSwitch") 
+        
+        if (type == "HomeAssistant") 
         {
             std::string entityId = integration["entityId"].string_value();
-
-            auto switchPtr = std::unique_ptr<HomeAssistantSwitch>(
-                new HomeAssistantSwitch(homeAssistantCreds_, entityId)
-            );
-            switchPtr->SetId(id);
-            switchPtr->SetName(name);
-            switchMap_[id] = std::move(switchPtr);
-        }
-        else if (type == "HomeAssistantDimmer") 
-        {
-            std::string entityId = integration["entityId"].string_value();
-
-            auto dimmerPtr = std::unique_ptr<HomeAssistantDimmer>(
-                new HomeAssistantDimmer(homeAssistantCreds_, entityId)
-            );
-            dimmerPtr->SetId(id);
-            dimmerPtr->SetName(name);
-            dimmerMap_[id] = std::move(dimmerPtr);
+            std::string domain = entityId.substr(0, entityId.find('.'));
+            if (domain == "switch") 
+            {
+                auto switchPtr = std::unique_ptr<HomeAssistantSwitch>(
+                    new HomeAssistantSwitch(homeAssistantCreds_, entityId)
+                );
+                switchPtr->SetId(id);
+                switchPtr->SetName(name);
+                switchMap_[id] = std::move(switchPtr);
+            } 
+            else if (domain == "light") 
+            {
+                auto dimmerPtr = std::unique_ptr<HomeAssistantDimmer>(
+                    new HomeAssistantDimmer(homeAssistantCreds_, entityId)
+                );
+                dimmerPtr->SetId(id);
+                dimmerPtr->SetName(name);
+                dimmerMap_[id] = std::move(dimmerPtr);
+            }
         }
     }
 
