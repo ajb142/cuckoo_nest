@@ -4,7 +4,6 @@
 #include "../ScreenManager.hpp"
 #include "../HAL/IDisplay.hpp"
 #include "../HAL/Beeper.hpp"
-#include "lvgl/lvgl.h"
 
 class DimmerScreen : public ScreenBase
 {
