@@ -23,6 +23,9 @@ set (
     Screens/SwitchScreen.cpp
     Integrations/IntegrationContainer.cpp
     Screens/CuckooLogoNest.cpp
+    Backplate/Message.cpp
+    Backplate/CommandMessage.cpp
+    Backplate/ResponseMessage.cpp
 )
 
 add_executable(cuckoo ${SRC_FILES})

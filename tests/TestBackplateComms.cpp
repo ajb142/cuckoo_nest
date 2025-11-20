@@ -79,8 +79,7 @@ TEST_F(TestBackplateComms, InitializeFailsIfOpenFails)
 TEST_F(TestBackplateComms, InitalizeBurstStages) 
 {
     InSequence s;
-    //BackplateComms comms(&mockSerialPort, 1000);
-    BackplateComms comms(&mockSerialPort, 10* 10000 * 1000);
+    BackplateComms comms(&mockSerialPort, 1000);
 
     EXPECT_CALL(mockSerialPort, Open(BaudRate::Baud115200))
         .WillRepeatedly(Return(true));
@@ -106,6 +105,42 @@ TEST_F(TestBackplateComms, InitalizeBurstStages)
     EXPECT_TRUE(comms.Initialize());
 }
 
+// All burst messages are Acked
+TEST_F(TestBackplateComms, BurstMessagesAreAcked)
+{
+    InSequence s;
+    BackplateComms comms(&mockSerialPort, 1000);
+
+    EXPECT_CALL(mockSerialPort, Open(BaudRate::Baud115200))
+        .WillRepeatedly(Return(true));
+
+    CommandMessage resetMessage(MessageType::Reset);
+
+    EXPECT_CALL(
+        mockSerialPort, 
+        Write(testing::ElementsAreArray(resetMessage.GetRawMessage()))
+    ).WillOnce(Return(resetMessage.GetRawMessage().size())); // Assuming Write returns number of bytes written
+
+    ResponseMessage burstPacket1StatusMessage(MessageType::TempHumidityData);
+    burstPacket1StatusMessage.SetPayload(std::vector<uint8_t>{0x10, 0x20});
+    
+    ResponseMessage burstPacket2BrkMessage(MessageType::ResponseAscii);
+    burstPacket2BrkMessage.SetPayload(std::vector<uint8_t>{'B', 'R', 'K'});
+
+    EXPECT_CALL(mockSerialPort, Read(_,_))
+        .WillOnce(mockReadResponse(burstPacket1StatusMessage.GetRawMessage()))
+        .WillOnce(mockReadResponse(burstPacket2BrkMessage.GetRawMessage()));
+
+    // Expect Ack for first burst message
+    CommandMessage ackMessage(MessageType::FetPresenceAck);
+    ackMessage.SetPayload(std::vector<uint8_t>{0x10, 0x20});
+    EXPECT_CALL(
+        mockSerialPort, 
+        Write(testing::ElementsAreArray(ackMessage.GetRawMessage()))
+    ).WillOnce(Return(ackMessage.GetRawMessage().size()));
+
+    EXPECT_TRUE(comms.Initialize());
+}
 
 // will need tests for
 // no response received to the read - return false

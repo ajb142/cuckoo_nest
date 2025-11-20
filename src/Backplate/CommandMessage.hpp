@@ -1,22 +1,17 @@
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
-#include <cstring>
-#include <vector>
-#include "CRC-CITT.hpp"
-#include "MessageType.hxx"
+#include "Message.hpp"
 
 
-class CommandMessage {
+class CommandMessage : public Message {
 public:
     CommandMessage(MessageType cmd)
-        : commandId(cmd), payloadLength(0)
+        : Message(cmd)
     {
     }
 
     CommandMessage()
-        : commandId(MessageType::Null), payloadLength(0)
+        : Message()
     {
     }
 
@@ -24,20 +19,14 @@ public:
     {
     }
 
-    const uint8_t Preamble[3] = {0xd5, 0x5d, 0xc3};
-    const int PreambleSize = 3;
+    const uint8_t* GetPreamble() const override
+    {
+        static const uint8_t preamble[3] = {0xd5, 0x5d, 0xc3};
+        return preamble;
+    }
 
-    const std::vector<uint8_t>& GetRawMessage();
-    const MessageType GetMessageCommand() const { return commandId; }
-
-private:
-    void BuildMessage();
-
-private:
-    std::vector<uint8_t> buffer;
-    MessageType commandId;
-    uint16_t payloadLength;
-
-    static CRC_CITT CrcCalculator;
-    
+    int GetPreambleSize() const override
+    {
+        return 3;
+    }
 };
