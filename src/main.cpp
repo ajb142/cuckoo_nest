@@ -155,12 +155,14 @@ int main()
 static void setup_logging() 
 {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("/var/logs/cuckoo.log");
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("/var/log/cuckoo.log");
+    file_sink->set_level(spdlog::level::info);
     
     std::vector<spdlog::sink_ptr> sinks {console_sink, file_sink};
-    auto logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
+    auto logger = std::make_shared<spdlog::logger>("cuckoo", sinks.begin(), sinks.end());
     
     spdlog::set_default_logger(logger);
+    spdlog::flush_on(spdlog::level::info);
     spdlog::info("Logging to console and file");
 }
 
