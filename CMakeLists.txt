@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(CuckooNest CXX)
 
 include(ExternalProject)
+include(FetchContent)
 
 # =====================================================
 # 1. Define the toolchain download information
