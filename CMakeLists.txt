@@ -1,4 +1,11 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.16)
+
+# Use old linker behavior for compatibility with older toolchains
+if(POLICY CMP0116)
+    cmake_policy(SET CMP0116 OLD)
+endif()
+
+
 project(CuckooNest CXX)
 
 include(ExternalProject)
